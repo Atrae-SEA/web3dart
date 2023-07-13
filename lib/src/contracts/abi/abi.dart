@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:convert/convert.dart';
+
 import '../../crypto/formatting.dart';
 import '../../crypto/keccak.dart';
 import 'arrays.dart';
@@ -102,9 +104,22 @@ class ContractAbi {
       final inputs = _parseParams(element['inputs'] as List?);
       final outputs = _parseParams(element['outputs'] as List?);
 
+      String concatedParameters = '';
+
+      for (var i = 0; i < inputs.length - 1; i++) {
+        concatedParameters += '${inputs[i].type.name},';
+      }
+      if (inputs.length > 0) {
+        concatedParameters += '${inputs[inputs.length - 1].type.name}';
+      }
+
+      String signature = '$name($concatedParameters)';
+      signature = hex.encode(keccak256(Uint8List.fromList(signature.codeUnits)).sublist(0, 4));
+
       functions.add(
         ContractFunction(
           name,
+          signature,
           inputs,
           outputs: outputs,
           type: parsedType,
@@ -184,13 +199,17 @@ class ContractAbi {
 /// A function defined in the ABI of an compiled contract.
 class ContractFunction {
   /// Constructor.
-  const ContractFunction(
+  ContractFunction(
     this.name,
+    this.signature,
     this.parameters, {
     this.outputs = const [],
     this.type = ContractFunctionType.function,
     this.mutability = StateMutability.nonPayable,
   });
+
+  /// The signature of the function, created by getting the first 4 bytes of the keccak256(function's name, function's parameters)
+  final String signature;
 
   /// The name of the function. Can be empty if it's an constructor or the
   /// default function.
