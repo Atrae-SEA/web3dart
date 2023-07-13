@@ -199,7 +199,7 @@ class ContractAbi {
 /// A function defined in the ABI of an compiled contract.
 class ContractFunction {
   /// Constructor.
-  ContractFunction(
+  const ContractFunction(
     this.name,
     this.signature,
     this.parameters, {
