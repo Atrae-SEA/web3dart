@@ -106,15 +106,17 @@ class ContractAbi {
 
       String concatedParameters = '';
 
-      for (var i = 0; i < inputs.length - 1; i++) {
-        concatedParameters += '${inputs[i].type.name},';
-      }
-      if (inputs.length > 0) {
+      if (inputs.length >= 1) {
+        for (var i = 0; i < inputs.length - 1; i++) {
+          concatedParameters += '${inputs[i].type.name},';
+        }
         concatedParameters += '${inputs[inputs.length - 1].type.name}';
       }
 
       String signature = '$name($concatedParameters)';
-      signature = hex.encode(keccak256(Uint8List.fromList(signature.codeUnits)).sublist(0, 4));
+      
+      signature = hex.encode(
+          keccak256(Uint8List.fromList(signature.codeUnits)).sublist(0, 4));
 
       functions.add(
         ContractFunction(
