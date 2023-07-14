@@ -1,3 +1,8 @@
+import 'dart:typed_data';
+
+import 'package:convert/convert.dart';
+import 'package:web3dart/src/crypto/keccak.dart';
+
 import '../credentials/address.dart';
 import 'abi/abi.dart';
 
@@ -35,8 +40,15 @@ class DeployedContract {
   ///
   /// If no, or more than one function matches that description, this method
   /// will throw.
-  ContractFunction function(String name) =>
-      functions.singleWhere((f) => f.name == name);
+  ContractFunction function(String name) {
+    try {
+      return functions.singleWhere((f) => f.name == name);
+    } catch (error) {
+      String signature = hex
+          .encode(keccak256(Uint8List.fromList(name.codeUnits)).sublist(0, 4));
+      return functions.singleWhere((f) => f.signature == signature);
+    }
+  }
 
   /// Finds the event defined by the contract that has the matching [name].
   ///
